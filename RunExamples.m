@@ -2,7 +2,6 @@
 
 clearvars; clc; echo off;
 
-
 %% Example 1: Quadratic system from Zhou et al (2012) - Y
 
 syms x1 x2
@@ -11,8 +10,8 @@ vars = [x1;x2];
 f = [-1.0*x1 + 2*x2^2;
      -x1*x2 - 2*x2];
 
-% Ueg1 = NormDecomp(f,vars)
-Ueg1 = Lyapunov(f,vars,2)
+Ueg1 = NormDecomp(f,vars)
+% Ueg1 = Lyapunov(f,vars,2)
 % PlotLandscape(f,Ueg1,vars,[-3 3],[-3 3]);
 % PlotVectors(f,Ueg1,vars,[-3 3],[-3 3]);
 CheckNorm(f,Ueg1,vars)
