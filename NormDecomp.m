@@ -23,6 +23,7 @@ syms epsl alph
 prog = sosprogram(vars,epsl);
 
 % Evaluate the correct extended basis for V
+% basis = minimalbasis(f, vars);
 basis = extendedbasis(f, vars);
 
 [prog,V] = sospolyvar(prog,basis,'wscoeff');
@@ -135,25 +136,24 @@ function [basis] = extendedbasis(f, vars)
     n = length(vars);
 
     % Find maximum total degree
-    d = feval(symengine, 'degree', basis);
-    disp(d)
+    d = 0;
+    for ib=1:length(basis)
+        d = max([double(feval(symengine, 'degree', basis(ib))), d]);
+    end
     
     % Now find maximum individual degree for each xᵢ, o[ii]
     o = zeros(n,1);
     for ii=1:n
-        o(ii) = feval(symengine, 'degree', basis, vars(ii));
+        for ib=1:length(basis)
+            o(ii) = max([double(feval(symengine,'degree',basis(ib),vars(ii)))...
+                            ,o(ii)]);
+        end
     end
-% 
-%     % Now find maximum individual degree for each xᵢ, o[ii]
-%     o = zeros(Int,1,n)
-%     for ii=1:n
-%         o[ii] = maximum([degree(Vi,x[ii]) for Vi in basis]);
-%     end
-% 
+
     % Add all mixed terms up to total degree d, and with maximum individual degree o[ii]
     basis = monomials(vars,0:d);
     for ii=1:length(basis)
-        for ix=1:length(vars)
+        for ix=1:n
             if feval(symengine, 'degree', basis(ii), vars(ix)) > o(ix)
                 basis(ii) = 0;
             end
