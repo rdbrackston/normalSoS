@@ -7,7 +7,7 @@ clearvars; clc; echo off;
 syms x1 x2
 vars = [x1;x2];
 
-f = [-1.0*x1 + 2*x2^2;
+f = [-x1 + 2*x2^2;
      -x1*x2 - 2*x2];
 
 Ueg1 = NormDecomp(f,vars)
@@ -26,7 +26,7 @@ vars = [x1; x2];
 f = [-1 + 9*x1 - 2*x1^3 + 9*x2 - 2*x2^3;
      1 - 11*x1 + 2*x1^3 + 11*x2 - 2*x2^3];
 
-Ueg2 = NormDecomp(f,vars)
+Ueg2 = NormDecomp(f,vars, 0)
 % PlotLandscape(f,Ueg2,vars,[-3 3],[-3 3])
 % PlotVectors(f,Ueg2,vars,[-3 3],[-3 3])
 CheckNorm(f,Ueg2,vars)
@@ -39,47 +39,19 @@ vars = x1;
 
 f = x1 - x1^3 + 0.1;
 
-Ueg3 = NormDecomp(f,vars)
+Ueg3 = NormDecomp(f,vars,0)
 % PlotLandscape(f,Ueg3,vars,[-2 2],[-2 2]);
 CheckNorm(f,Ueg3,vars)
 
 
-%% Example 4: Two-dimensional bistable system with curl dynamics
-% Works well, only if the curl component is significant (~0.1), otherwise
-% it generates something non orthogonal. Using a 4th-order lower bound
-% polynomial helps.
-
-syms x1 x2
-vars = [x1;x2];
-
-f = [-x1^3 + x1 - 2*x1^3*x2^4 + 2*x1*x2^4;
-     -4*x2^3 - 2*x1^4*x2^3 + 4*x1^2*x2^3];
-fPerp = [4*x2^3 + 2*x1^4*x2^3 - 4*x1^2*x2^3;
-         x1 - x1^3 - 2*x1^3*x2^4 + 2*x1*x2^4];
-f = f + 0.1*fPerp;
-
-Ueg4 = NormDecomp(f,vars,2,4)
-% PlotLandscape(f,Ueg4,vars,[-1.5 1.5],[-1.5 1.5]);
-% PlotVectors(f,Ueg4,vars,[-2 2],[-1.5 1.5]);
-CheckNorm(f,Ueg4,vars)
-
-
-%% Example 5 Lotka-Volterra
-% Unable to find something reasonable so converges to very small
-% coefficients. This is also true of the standard Lyapunov method.
-
+%% Example 4: Two-dimensional bistable system with curl dynamics - Y
+a = 0.5;    l = 0.5*a;    b = -0.05;    c = 0.5;
 syms x1 x2
 vars = [x1; x2];
-
-a=2/3;    b=4/3;    c=1;    d=2;
-f = [a*x1 - b*x1*x2;
-     c*x1*x2 - d*x2];
-
-% Ueg5 = NormDecomp(f,vars,2)
-Ueg5 = Lyapunov(f,vars,2)
-% PlotLandscape(f,Ueg5,vars,[0 20],[0 20]);
-% PlotVectors(f,Ueg5,vars,[0 20],[0 20]);
-CheckNorm(f,Ueg5,vars)
+f = [2*a*x1 - 4*l*x1^3 - b + 4*c*l*x2^3;
+     2*c*a*x1 - 4*c*l*x1^3 - c*b - 4*l*x2^3];
+Ueg4 = NormDecomp(f,vars,1)
+CheckNorm(f,Ueg4,vars)
 
 
 %% Example 6: Fei's 4dof Michaelis-Menten enzyme dynamics model

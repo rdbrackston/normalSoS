@@ -16,27 +16,76 @@ else
     p = 2;
 end
 
-syms epsl alph
+syms alph epsl
+n = length(vars);
 
 % =============================================
 %  Initialize the sum of squares program and form the variables
-prog = sosprogram(vars,epsl);
+prog = sosprogram(vars);
 
 % Evaluate the correct extended basis for V
 % basis = minimalbasis(f, vars);
 basis = extendedbasis(f, vars);
+disp('Chosen basis as:')
+disp(basis.')
+
 
 [prog,V] = sospolyvar(prog,basis,'wscoeff');
+
+% =============================================
+%  Set up the lower bounding polynomial, bnd
+o = zeros(n,1);
+if n>1
+    bnd = vars(1);    % Initialise the type of bnd
+    % First add the maximum even order polynomial for each x[ii]
+    for ii=1:n
+        for ib=1:length(basis)
+            tmp = double(feval(symengine,'degree',basis(ib),vars(ii)));
+            if mod(tmp,2)==0 && tmp>0
+                o(ii) = max([tmp ,o(ii)]);
+                bnd = bnd + vars(ii)^o(ii);
+            end
+        end
+    end
+    
+    % Now add any fully even terms of mixed x[ii], e.g. x[1]^2*x[2]^2
+    for ib=1:length(basis)
+        iter = 0;
+        for ii=1:n
+            tmp = double(feval(symengine,'degree',basis(ib),vars(ii)));
+            if (mod(tmp,2)==0 && tmp>0)
+                iter = iter + 1;
+            end
+        end
+        if iter==n;    bnd = bnd + basis(ib);    end
+    end
+    bnd = bnd - vars(1);
+    [~,trms] = coeffs(bnd);
+    bnd = monomials(trms,1);
+    b = length(bnd);
+else
+    b = 1;
+    for ib=1:length(basis)
+        o(1) = max([feval(symengine,'degree',basis(ib),vars(1)),o(1)]);
+    end
+    bnd = vars(1)^o(1);
+    bnd = [bnd];
+end
 
 % Evaluate grad(V)
 for iv=1:length(vars)
     gV(iv) = diff(V,vars(iv));
 end
 
+
 % =============================================
 % Constraint 1 : positive definiteness of V
-% V(x) - epsilon(x1^2 + x2^2 + ... xn^2) >= 0
-prog = sosineq(prog,V-epsl*sum(vars.^p));
+% V(x) - E*bnd >= 0
+[prog,E] = sospolymatrixvar(prog,monomials(vars(1),0),[1,b]);
+prog = sosineq(prog,V-E*bnd);
+for ib=1:b
+    prog = sosineq(prog,E(b));
+end
 
 % Constraint 2: matrix inequality imposes
 % grad(U).gU <= 0. which also imposes grad(U).f <=0
@@ -45,8 +94,8 @@ expr = [-gV*f,           gV;
 prog = sosmatrixineq(prog,expr);
 
 % =============================================
-% Set objective to maximise epsilon then call solver
-prog = sossetobj(prog, -epsl);
+% Set objective to maximise sum over E then call solver
+prog = sossetobj(prog, -sum(E));
 prog = sossolve(prog);
 
 U = sosgetsol(prog,V);
@@ -112,18 +161,6 @@ function [basis] = minimalbasis(f, vars)
     basis = coeff.*monom;
     basis = reshape(basis,[],1);
     basis = basis(basis~=0);
-    
-%     basis = 1.0;
-% 
-%     % Loop over the elements of f
-%     for (i,fi) in enumerate(f)
-%         fTmp = [];
-%         for elem in fi
-%             fTmp += coefficient(elem)*elem;
-%         end
-%         basis = basis + fTmp*x[i];
-%     end
-%     basis = monomials(basis);
 
 end
 
@@ -132,7 +169,6 @@ function [basis] = extendedbasis(f, vars)
 
     % Start from the minimal basis
     basis = minimalbasis(f,vars);
-    disp(basis)
     n = length(vars);
 
     % Find maximum total degree
@@ -160,8 +196,6 @@ function [basis] = extendedbasis(f, vars)
         end
     end
     basis = basis(basis~=0);
-    disp('Found minimal basis as:')
-    disp(basis.')
 % 
 end
 
