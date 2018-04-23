@@ -26,7 +26,7 @@ vars = [x1; x2];
 f = [-1 + 9*x1 - 2*x1^3 + 9*x2 - 2*x2^3;
      1 - 11*x1 + 2*x1^3 + 11*x2 - 2*x2^3];
 
-Ueg2 = NormDecomp(f,vars, 0)
+Ueg2 = NormDecomp(f,vars, 1)
 % PlotLandscape(f,Ueg2,vars,[-3 3],[-3 3])
 % PlotVectors(f,Ueg2,vars,[-3 3],[-3 3])
 CheckNorm(f,Ueg2,vars)
@@ -39,7 +39,7 @@ vars = x1;
 
 f = x1 - x1^3 + 0.1;
 
-Ueg3 = NormDecomp(f,vars,0)
+Ueg3 = NormDecomp(f,vars,1)
 % PlotLandscape(f,Ueg3,vars,[-2 2],[-2 2]);
 CheckNorm(f,Ueg3,vars)
 
@@ -52,6 +52,17 @@ f = [2*a*x1 - 4*l*x1^3 - b + 4*c*l*x2^3;
      2*c*a*x1 - 4*c*l*x1^3 - c*b - 4*l*x2^3];
 Ueg4 = NormDecomp(f,vars,1)
 CheckNorm(f,Ueg4,vars)
+
+
+%% Example 5: Maier-Stein model
+
+m = 1.0;    g = 1.0*m;
+syms x1 x2
+vars = [x1; x2];
+f = [x1 - x1^3 - g*x1*x2^2;
+     -m*(x1^2 + 1)*x2];
+Ueg5 = NormDecomp(f,vars,0)
+CheckNorm(f,Ueg5,vars)
 
 
 %% Example 6: Fei's 4dof Michaelis-Menten enzyme dynamics model
@@ -87,8 +98,8 @@ f = [-x1 + x2^3 - 3*x3*x4;
       x1*x3 - x4^3];
 
 Ueg7 = NormDecomp(f,vars)
-PlotLandscape(f,Ueg7,vars,[-3 3],[-3 3]);
-PlotVectors(f,Ueg7,vars,[-3 3],[-3 3]);
+% PlotLandscape(f,Ueg7,vars,[-3 3],[-3 3]);
+% PlotVectors(f,Ueg7,vars,[-3 3],[-3 3]);
 CheckNorm(f,Ueg7,vars)
 
 

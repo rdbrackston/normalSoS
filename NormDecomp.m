@@ -24,8 +24,8 @@ n = length(vars);
 prog = sosprogram(vars);
 
 % Evaluate the correct extended basis for V
-% basis = minimalbasis(f, vars);
-basis = extendedbasis(f, vars);
+basis = minimalbasis(f, vars);
+% basis = extendedbasis(f, vars);
 disp('Chosen basis as:')
 disp(basis.')
 
@@ -43,9 +43,9 @@ if n>1
             tmp = double(feval(symengine,'degree',basis(ib),vars(ii)));
             if mod(tmp,2)==0 && tmp>0
                 o(ii) = max([tmp ,o(ii)]);
-                bnd = bnd + vars(ii)^o(ii);
             end
         end
+        bnd = bnd + vars(ii)^o(ii);
     end
     
     % Now add any fully even terms of mixed x[ii], e.g. x[1]^2*x[2]^2
@@ -57,7 +57,7 @@ if n>1
                 iter = iter + 1;
             end
         end
-        if iter==n;    bnd = bnd + basis(ib);    end
+        if iter>1;    bnd = bnd + basis(ib);    end
     end
     bnd = bnd - vars(1);
     [~,trms] = coeffs(bnd);
@@ -71,6 +71,8 @@ else
     bnd = vars(1)^o(1);
     bnd = [bnd];
 end
+disp('Chosen bound as:')
+disp(bnd.')
 
 % Evaluate grad(V)
 for iv=1:length(vars)
