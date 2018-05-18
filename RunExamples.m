@@ -65,26 +65,6 @@ Ueg5 = NormDecomp(f,vars,0)
 CheckNorm(f,Ueg5,vars)
 
 
-%% Example 6: Fei's 4dof Michaelis-Menten enzyme dynamics model
-% Unable to find something reasonable so converges to very small
-% coefficients. This is also true of the standard Lyapunov method.
-
-syms x1 x2 x3 x4
-vars = [x1;x2;x3;x4];
-
-h1 = 2;    h2 = 0.2;    h3 = 3;
-f = [-h1*x1*x2 + h2*x3;
-     -h1*x1*x2 + (h2+h3)*x3;
-     h1*x1*x2 - (h2+h3)*x3;
-     h3*x3];
-
-% Ueg6 = NormDecomp(f,vars)
-Ueg6 = Lyapunov(f,vars,2)
-% PlotLandscape(f,Ueg6,vars,[0 10],[0 10]);
-% PlotVectors(f,Ueg6,vars,[0 10],[0 10]);
-CheckNorm(f,Ueg6,vars)
-
-
 %% Example 7: From Papachristodolou and Prajna (2005)
 % Finds a reasonable loking Lyapunov function but the decomposition is not
 % orthogonal
